@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KOOK Bot 管理后台</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+    <script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        #app {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .stat-card .value {
+            color: #333;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 24px;
+        }
+        .tasks-section, .send-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .task-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .task-item {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .task-id {
+            font-weight: 600;
+            color: #667eea;
+        }
+        .task-rule {
+            font-size: 14px;
+            color: #666;
+        }
+        .task-content {
+            color: #333;
+            margin-top: 8px;
+        }
+        .task-channel {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        .task-guild {
+            font-size: 12px;
+            color: #667eea;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+        .form-item {
+            margin-bottom: 20px;
+        }
+        .form-item label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-item input, .form-item textarea, .form-item select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .form-item input:focus, .form-item textarea:focus, .form-item select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 6px 16px;
+            font-size: 12px;
+        }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .filter-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .refresh-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        .refresh-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <h1>🤖 KOOK Bot 管理后台</h1>
+            <div class="user-info" v-if="isAuthenticated">
+                <span>欢迎回来</span>
+                <button class="logout-btn" @click="logout">退出登录</button>
+            </div>
+        </div>
+
+        <!-- 首次设置密码界面 -->
+        <div v-if="!isAuthenticated && !isSetup" style="max-width: 400px; margin: 100px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; margin-bottom: 30px;">首次设置管理员密码</h2>
+            <div class="form-item">
+                <label>设置密码</label>
+                <input type="password" v-model="setupForm.password" placeholder="请输入密码（至少4位）">
+            </div>
+            <button class="btn btn-primary" @click="setupPassword" :disabled="setupLoading">
+                {{ setupLoading ? '设置中...' : '设置密码' }}
+            </button>
+            <p v-if="setupError" style="color: #ef4444; margin-top: 12px; text-align: center;">{{ setupError }}</p>
+        </div>
+
+        <!-- 登录界面 -->
+        <div v-if="!isAuthenticated && isSetup" style="max-width: 400px; margin: 100px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h2 style="text-align: center; margin-bottom: 30px;">管理员登录</h2>
+            <div class="form-item">
+                <label>密码</label>
+                <input type="password" v-model="loginForm.password" placeholder="请输入密码" @keyup.enter="login">
+            </div>
+            <button class="btn btn-primary" @click="login" :disabled="loginLoading">
+                {{ loginLoading ? '登录中...' : '登录' }}
+            </button>
+            <p v-if="loginError" style="color: #ef4444; margin-top: 12px; text-align: center;">{{ loginError }}</p>
+        </div>
+
+        <!-- 主界面 -->
+        <div v-else>
+            <div class="stats" v-if="stats">
+                <div class="stat-card">
+                    <h3>总任务数</h3>
+                    <div class="value">{{ stats.total_tasks }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>频道数</h3>
+                    <div class="value">{{ stats.total_channels }}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Bot 状态</h3>
+                    <div class="value" :style="{ color: stats.bot_status === 'running' ? '#10b981' : '#ef4444' }">
+                        {{ stats.bot_status === 'running' ? '🟢 运行中' : '🔴 已停止' }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="tasks-section">
+                    <h2 class="section-title">📋 定时任务列表</h2>
+                    
+                    <div class="filter-bar">
+                        <input 
+                            type="text" 
+                            class="filter-input" 
+                            v-model="searchQuery" 
+                            placeholder="搜索任务内容、频道或服务器名称..."
+                            @input="filterTasks"
+                        >
+                        <button class="btn refresh-btn" @click="loadData">🔄 刷新</button>
+                    </div>
+
+                    <div class="task-list" v-if="loading">
+                        <div class="loading">⏳ 加载中...</div>
+                    </div>
+                    <div class="task-list" v-else-if="filteredTasks.length === 0">
+                        <div class="empty-state">📭 暂无任务</div>
+                    </div>
+                    <div class="task-list" v-else>
+                        <div class="task-item" v-for="task in filteredTasks" :key="task.show_id">
+                            <div class="task-header">
+                                <span class="task-id">{{ task.show_id }}</span>
+                                <button class="btn btn-danger" @click="deleteTask(task.show_id)">删除</button>
+                            </div>
+                            <div class="task-rule">📅 {{ task.rule_desc }}</div>
+                            <div class="task-content">📝 {{ task.content }}</div>
+                            <div class="task-guild" v-if="task.guild_name">🏢 {{ task.guild_name }}</div>
+                            <div class="task-channel">📍 频道: {{ task.channel_name || task.channel_id }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="send-section">
+                    <div class="tab-buttons">
+                        <button class="tab-btn" :class="{active: activeTab === 'message'}" @click="activeTab = 'message'">
+                            📤 发送消息
+                        </button>
+                        <button class="tab-btn" :class="{active: activeTab === 'create'}" @click="activeTab = 'create'">
+                            ➕ 创建提醒
+                        </button>
+                    </div>
+                    
+                    <!-- 发送消息 -->
+                    <div v-if="activeTab === 'message'">
+                        <div class="form-item">
+                            <label>选择服务器</label>
+                            <select v-model="sendMessage.serverId" @change="updateChannelsForServer">
+                                <option value="">-- 请选择服务器 --</option>
+                                <option v-for="server in servers" :key="server.id" :value="server.id">
+                                    {{ server.name }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-item" v-if="filteredChannelsForMessage.length > 0">
+                            <label>选择频道</label>
+                            <select v-model="sendMessage.channelId">
+                                <option value="">-- 请选择频道 --</option>
+                                <option v-for="channel in filteredChannelsForMessage" :key="channel.id" :value="channel.id">
+                                    {{ channel.guild_name }} - {{ channel.name }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-item" v-else-if="sendMessage.serverId" style="color: #999; font-size: 14px;">
+                            该服务器下暂无可用的公开频道
+                        </div>
+
+                        <div class="form-item" style="font-size: 12px; color: #999; margin-top: -10px; margin-bottom: 10px;">
+                            或手动输入频道ID: <input type="text" v-model="sendMessage.channelId" style="width: auto; padding: 6px 10px; font-size: 12px; margin-left: 8px;" placeholder="频道ID">
+                        </div>
+
+                        <div class="form-item">
+                            <label>消息内容</label>
+                            <textarea
+                                v-model="sendMessage.content"
+                                rows="4"
+                                placeholder="输入要发送的消息..."
+                            ></textarea>
+                        </div>
+
+                        <button class="btn btn-primary" @click="sendManualMessage" :disabled="sending">
+                            {{ sending ? '⏳ 发送中...' : '🚀 发送消息' }}
+                        </button>
+                    </div>
+
+                    <!-- 创建提醒 -->
+                    <div v-if="activeTab === 'create'">
+                        <div class="form-item">
+                            <label>选择服务器</label>
+                            <select v-model="createTask.serverId" @change="updateChannelsForServer">
+                                <option value="">-- 请选择服务器 --</option>
+                                <option v-for="server in servers" :key="server.id" :value="server.id">
+                                    {{ server.name }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-item" v-if="filteredChannelsForCreate.length > 0">
+                            <label>选择频道</label>
+                            <select v-model="createTask.channelId">
+                                <option value="">-- 请选择频道 --</option>
+                                <option v-for="channel in filteredChannelsForCreate" :key="channel.id" :value="channel.id">
+                                    {{ channel.guild_name }} - {{ channel.name }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-item" v-else-if="createTask.serverId" style="color: #999; font-size: 14px;">
+                            该服务器下暂无可用的公开频道
+                        </div>
+
+                        <div class="form-item" style="font-size: 12px; color: #999; margin-top: -10px; margin-bottom: 10px;">
+                            或手动输入频道ID: <input type="text" v-model="createTask.channelId" style="width: auto; padding: 6px 10px; font-size: 12px; margin-left: 8px;" placeholder="频道ID">
+                        </div>
+
+                        <div class="form-item">
+                            <label>提醒类型</label>
+                            <select v-model="createTask.type" @change="updateRuleDesc">
+                                <option value="interval">间隔提醒</option>
+                                <option value="cron">定时提醒</option>
+                            </select>
+                        </div>
+
+                        <div class="form-item" v-if="createTask.type === 'interval'">
+                            <label>间隔时间（分钟）</label>
+                            <input 
+                                type="number" 
+                                v-model="createTask.minutes" 
+                                placeholder="例如: 60（每小时提醒一次）"
+                                @input="updateRuleDesc"
+                            >
+                        </div>
+
+                        <div class="form-item" v-if="createTask.type === 'cron'">
+                            <label>提醒时间</label>
+                            <input 
+                                type="time" 
+                                v-model="createTask.time" 
+                                @input="updateRuleDesc"
+                            >
+                        </div>
+
+                        <div class="form-item" v-if="createTask.type === 'cron'">
+                            <label>重复频率</label>
+                            <select v-model="createTask.frequency" @change="updateRuleDesc">
+                                <option value="daily">每天</option>
+                                <option value="weekly">每周</option>
+                            </select>
+                        </div>
+
+                        <div class="form-item" v-if="createTask.type === 'cron' && createTask.frequency === 'weekly'">
+                            <label>星期</label>
+                            <select v-model="createTask.weekday" @change="updateRuleDesc">
+                                <option value="0">周一</option>
+                                <option value="1">周二</option>
+                                <option value="2">周三</option>
+                                <option value="3">周四</option>
+                                <option value="4">周五</option>
+                                <option value="5">周六</option>
+                                <option value="6">周日</option>
+                            </select>
+                        </div>
+
+                        <div class="form-item">
+                            <label>预览</label>
+                            <div style="padding: 12px; background: #f3f4f6; border-radius: 6px; color: #666;">
+                                {{ createTask.ruleDesc || '请填写相关信息' }}
+                            </div>
+                        </div>
+                        
+                        <div class="form-item">
+                            <label>提醒内容</label>
+                            <textarea 
+                                v-model="createTask.content" 
+                                rows="3" 
+                                placeholder="输入提醒内容..."
+                            ></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary" @click="createReminder" :disabled="creating">
+                            {{ creating ? '⏳ 创建中...' : '➕ 创建提醒' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, reactive, computed } = Vue;
+
+        createApp({
+            setup() {
+                const isAuthenticated = ref(false);
+                const token = ref(localStorage.getItem('auth_token') || '');
+                const loading = ref(true);
+                const tasks = ref([]);
+                const stats = ref(null);
+                const searchQuery = ref('');
+                const activeTab = ref('message');
+                const loginError = ref('');
+                const loginLoading = ref(false);
+                const sending = ref(false);
+                const creating = ref(false);
+
+                const isSetup = ref(false);
+                const setupForm = reactive({
+                    password: ''
+                });
+                const setupLoading = ref(false);
+                const setupError = ref('');
+                
+                const loginForm = reactive({
+                    password: ''
+                });
+
+                const sendMessage = reactive({
+                    serverId: '',
+                    channelId: '',
+                    content: ''
+                });
+
+                const createTask = reactive({
+                    serverId: '',
+                    channelId: '',
+                    type: 'interval',
+                    minutes: 60,
+                    time: '12:00',
+                    frequency: 'daily',
+                    weekday: '0',
+                    content: '',
+                    ruleDesc: ''
+                });
+
+                const channels = ref([]);
+                const servers = ref([]);
+
+                const filteredTasks = computed(() => {
+                    if (!searchQuery.value) return tasks.value;
+                    const query = searchQuery.value.toLowerCase();
+                    return tasks.value.filter(task =>
+                        task.content.toLowerCase().includes(query) ||
+                        task.channel_id.toLowerCase().includes(query) ||
+                        task.show_id.toLowerCase().includes(query) ||
+                        (task.channel_name && task.channel_name.toLowerCase().includes(query)) ||
+                        (task.guild_name && task.guild_name.toLowerCase().includes(query))
+                    );
+                });
+
+                const filteredChannelsForMessage = computed(() => {
+                    if (!sendMessage.serverId) return [];
+                    // 使用服务器 ID 精确匹配
+                    const serverChannels = channels.value.filter(channel =>
+                        channel.guild_id === sendMessage.serverId
+                    );
+                    return serverChannels;
+                });
+
+                const filteredChannelsForCreate = computed(() => {
+                    if (!createTask.serverId) return [];
+                    // 使用服务器 ID 精确匹配
+                    const serverChannels = channels.value.filter(channel =>
+                        channel.guild_id === createTask.serverId
+                    );
+                    return serverChannels;
+                });
+
+                const updateChannelsForServer = () => {
+                    // 当选择服务器时，清空频道选择
+                    sendMessage.channelId = '';
+                    createTask.channelId = '';
+                };
+
+                const checkSetup = async () => {
+                    try {
+                        const res = await fetch('/api/check-setup');
+                        const data = await res.json();
+                        isSetup.value = data.setup;
+                    } catch (e) {
+                        isSetup.value = false;
+                    }
+                };
+                
+                const setupPassword = async () => {
+                    setupLoading.value = true;
+                    setupError.value = '';
+                    try {
+                        const res = await fetch('/api/setup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(setupForm)
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            isSetup.value = true;
+                            alert('密码设置成功！请登录');
+                        } else {
+                            setupError.value = data.detail || '设置失败';
+                        }
+                    } catch (e) {
+                        setupError.value = '网络错误，请稍后重试';
+                    }
+                    setupLoading.value = false;
+                };
+                
+                const checkAuth = async () => {
+                    if (!token.value) return false;
+                    try {
+                        const res = await fetch('/api/check-auth', {
+                            headers: { 'Authorization': `Bearer ${token.value}` }
+                        });
+                        const data = await res.json();
+                        return data.authenticated;
+                    } catch {
+                        return false;
+                    }
+                };
+
+                const login = async () => {
+                    loginLoading.value = true;
+                    loginError.value = '';
+                    try {
+                        const res = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(loginForm)
+                        });
+                        const data = await res.json();
+                        
+                        if (res.ok) {
+                            token.value = data.token;
+                            localStorage.setItem('auth_token', data.token);
+                            isAuthenticated.value = true;
+                            await loadData();
+                        } else {
+                            loginError.value = data.detail || '登录失败';
+                        }
+                    } catch (error) {
+                        loginError.value = '网络错误，请稍后重试';
+                    } finally {
+                        loginLoading.value = false;
+                    }
+                };
+
+                const logout = async () => {
+                    try {
+                        await fetch('/api/logout', {
+                            headers: { 'Authorization': `Bearer ${token.value}` }
+                        });
+                    } catch {}
+                    token.value = '';
+                    localStorage.removeItem('auth_token');
+                    isAuthenticated.value = false;
+                };
+
+                const loadData = async () => {
+                    loading.value = true;
+                    try {
+                        const [tasksRes, statsRes, serversRes, channelsRes] = await Promise.all([
+                            fetch('/api/tasks', {
+                                headers: { 'Authorization': `Bearer ${token.value}` }
+                            }),
+                            fetch('/api/stats', {
+                                headers: { 'Authorization': `Bearer ${token.value}` }
+                            }),
+                            fetch('/api/servers', {
+                                headers: { 'Authorization': `Bearer ${token.value}` }
+                            }),
+                            fetch('/api/channels', {
+                                headers: { 'Authorization': `Bearer ${token.value}` }
+                            })
+                        ]);
+
+                        if (tasksRes.ok && statsRes.ok && serversRes.ok && channelsRes.ok) {
+                            const tasksData = await tasksRes.json();
+                            const statsData = await statsRes.json();
+                            const serversData = await serversRes.json();
+                            const channelsData = await channelsRes.json();
+
+                            tasks.value = tasksData.tasks || [];
+                            stats.value = statsData;
+                            servers.value = serversData.servers || [];
+                            channels.value = channelsData.channels || [];
+                        }
+                    } catch (error) {
+                        console.error('加载数据失败:', error);
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const deleteTask = async (showId) => {
+                    if (!confirm(`确定要删除任务 ${showId} 吗？`)) return;
+                    
+                    try {
+                        const res = await fetch(`/api/tasks/${showId}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token.value}` }
+                        });
+                        
+                        if (res.ok) {
+                            await loadData();
+                            alert('删除成功');
+                        } else {
+                            const data = await res.json();
+                            alert(`删除失败: ${data.detail}`);
+                        }
+                    } catch (error) {
+                        alert('删除失败，请稍后重试');
+                    }
+                };
+
+                const sendManualMessage = async () => {
+                    if (!sendMessage.channelId || !sendMessage.content) {
+                        alert('请填写频道ID和消息内容');
+                        return;
+                    }
+                    
+                    sending.value = true;
+                    try {
+                        const res = await fetch('/api/send-message', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token.value}`
+                            },
+                            body: JSON.stringify({
+                                channel_id: sendMessage.channelId,
+                                content: sendMessage.content
+                            })
+                        });
+                        
+                        if (res.ok) {
+                            alert('消息发送成功！');
+                            sendMessage.content = '';
+                        } else {
+                            const data = await res.json();
+                            alert(`发送失败: ${data.detail}`);
+                        }
+                    } catch (error) {
+                        alert('发送失败，请稍后重试');
+                    } finally {
+                        sending.value = false;
+                    }
+                };
+
+                const updateRuleDesc = () => {
+                    if (createTask.type === 'interval') {
+                        const mins = createTask.minutes || 1;
+                        if (mins >= 60) {
+                            const hours = Math.floor(mins / 60);
+                            createTask.ruleDesc = `每${hours}小时`;
+                        } else {
+                            createTask.ruleDesc = `每${mins}分钟`;
+                        }
+                    } else if (createTask.type === 'cron') {
+                        const time = createTask.time || '12:00';
+                        if (createTask.frequency === 'daily') {
+                            createTask.ruleDesc = `每天 ${time}`;
+                        } else {
+                            const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+                            createTask.ruleDesc = `每 周${weekdays[parseInt(createTask.weekday)]} ${time}`;
+                        }
+                    }
+                };
+
+                const createReminder = async () => {
+                    if (!createTask.channelId || !createTask.content) {
+                        alert('请填写频道ID和提醒内容');
+                        return;
+                    }
+
+                    creating.value = true;
+                    try {
+                        const params = {};
+                        if (createTask.type === 'interval') {
+                            params.minutes = parseInt(createTask.minutes) || 60;
+                        } else if (createTask.type === 'cron') {
+                            const [hour, minute] = (createTask.time || '12:00').split(':');
+                            params.hour = parseInt(hour);
+                            params.minute = parseInt(minute);
+                            if (createTask.frequency === 'weekly') {
+                                params.day_of_week = parseInt(createTask.weekday);
+                            }
+                        }
+
+                        const res = await fetch('/api/tasks', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token.value}`
+                            },
+                            body: JSON.stringify({
+                                channel_id: createTask.channelId,
+                                task_type: createTask.type,
+                                params: params,
+                                content: createTask.content,
+                                rule_desc: createTask.ruleDesc
+                            })
+                        });
+
+                        if (res.ok) {
+                            const data = await res.json();
+                            alert(`任务 ${data.show_id} 创建成功！`);
+                            createTask.content = '';
+                            createTask.channelId = '';
+                            await loadData();
+                        } else {
+                            const data = await res.json();
+                            alert(`创建失败: ${data.detail}`);
+                        }
+                    } catch (error) {
+                        alert('创建失败，请稍后重试');
+                    } finally {
+                        creating.value = false;
+                    }
+                };
+
+                // 初始化
+                const init = async () => {
+                    await checkSetup();
+                    if (isSetup.value) {
+                        const auth = await checkAuth();
+                        if (auth) {
+                            isAuthenticated.value = true;
+                            await loadData();
+                        }
+                    }
+                };
+
+                init();
+                updateRuleDesc();
+
+                return {
+                    isAuthenticated,
+                    isSetup,
+                    token,
+                    loading,
+                    tasks,
+                    stats,
+                    channels,
+                    servers,
+                    searchQuery,
+                    activeTab,
+                    loginError,
+                    loginLoading,
+                    sending,
+                    creating,
+                    loginForm,
+                    setupForm,
+                    setupLoading,
+                    setupError,
+                    sendMessage,
+                    createTask,
+                    filteredTasks,
+                    filteredChannelsForMessage,
+                    filteredChannelsForCreate,
+                    login,
+                    logout,
+                    loadData,
+                    deleteTask,
+                    sendManualMessage,
+                    updateRuleDesc,
+                    createReminder,
+                    updateChannelsForServer,
+                    setupPassword
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

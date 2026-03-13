@@ -1,0 +1,18 @@
+services:
+  khl-bot:
+    build: .
+    container_name: khl-bot
+    restart: unless-stopped
+    ports:
+      - "8000:8000"  # Web 管理界面端口
+    env_file:
+      - .env
+    volumes:
+      - ./data/tasks.json:/app/tasks.json  # 持久化任务数据
+      - ./data/logs:/app/logs  # 日志目录
+    networks:
+      - khl-bot-network
+
+networks:
+  khl-bot-network:
+    driver: bridge

@@ -1,0 +1,6 @@
+khl.py==0.3.17
+python-dotenv>=1.0.0
+apscheduler>=3.10.4
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
