@@ -17,26 +17,26 @@ KOOK 频道机器人，支持定时提醒功能和 Web 管理界面。
 
 ## 🚀 快速开始
 
-### 首次部署
+### Docker 部署
 
-1. **克隆项目**
+#### 1. 克隆项目
 ```bash
 git clone https://github.com/rnm330/Kook-remind-bot.git
 cd Kook-remind-bot
 ```
 
-2. **配置环境变量**
+#### 2. 配置环境变量
 ```bash
 cp .env.example .env
 # 编辑 .env 文件，填入你的 KOOK_BOT_TOKEN
 ```
 
-3. **启动服务**
+#### 3. 启动服务
 ```bash
 docker-compose up -d
 ```
 
-4. **首次设置密码**
+#### 4. 首次设置密码
 首次访问管理界面时，需要设置登录密码：
 - 打开浏览器访问: `http://your-server-ip:8000`
 - 输入您要设置的密码并确认
@@ -79,22 +79,23 @@ docker-compose up -d
 
 ## 🖥️ 手动部署（不推荐）
 
-1. 安装依赖
+#### 1. 安装依赖
 ```bash
 pip install -r requirements.txt
 ```
 
-2. 配置环境变量
+#### 2. 配置环境变量
 ```bash
 export KOOK_BOT_TOKEN="your_bot_token"
 ```
 
-3. 启动服务
+#### 3. 启动服务
 ```bash
 python app.py
 ```
 
-4. 首次访问 `http://localhost:8000` 设置登录密码
+#### 4. 首次设置密码
+访问 `http://localhost:8000` 设置登录密码
 
 ## 📁 项目结构
 
